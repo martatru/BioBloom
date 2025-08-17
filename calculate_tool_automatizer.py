@@ -19,7 +19,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-# === CONFIGURATION ===
+# === CONFIGURATION ===}
 fasta_file = f"/home/marta/Desktop/biobloom_proteomic_data/{args.species}.fasta"
 base_dir = Path.home() / "Desktop" / "biopep_results"
 
