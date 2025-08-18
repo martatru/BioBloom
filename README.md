@@ -1,5 +1,9 @@
 # BioBloom
 
+<p align="center">
+  <img src="BioBloom/biobloom_logo.png" alt="BioBloom Logo" width="300">
+</p>
+
 **BioBloom - Microalgae as a Source of Bioactive Compounds in Pharmacology**
 
 ---
@@ -25,4 +29,3 @@ Install the dependencies via pip:
 
 ```bash
 pip install biopython selenium tqdm openpyxl
-
