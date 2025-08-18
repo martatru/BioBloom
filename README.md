@@ -4,7 +4,9 @@
 
 # BioBloom 🌿🫀
 
-**BioBloom - Microalgae as a Source of Bioactive Compounds in Pharmacology**
+**Microalgae as a Source of Bioactive Compounds in Pharmacology**
+
+**Marta Truszczyńska & Paulina Duszyńska**
 
 ---
 
