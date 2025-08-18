@@ -1,5 +1,5 @@
 <p align="right">
-  <img src="BioBloom/biobloom_logo.png" alt="BioBloom Logo" width="120">
+  <img src="biobloom_logo" alt="BioBloom Logo" width="120">
 </p>
 
 # BioBloom
