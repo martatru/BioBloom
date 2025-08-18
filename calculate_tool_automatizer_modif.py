@@ -1,3 +1,5 @@
+#this script is a modified version of the original because it was stopping after hitting 6300 queries on biopep-uwm
+
 import os
 import time
 import argparse

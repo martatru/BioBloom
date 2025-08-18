@@ -10,7 +10,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from tqdm import tqdm
 
-#potrzebuje debugowania hihi
+#potrzebuje debugowania hihi 
 
 # === ARGPARSE ===
 parser = argparse.ArgumentParser(description="Download Biopep UWM digestion + fragments results")
