@@ -8,7 +8,7 @@
 
 BioBloom is a research project aimed at exploring microalgae as a rich source of bioactive compounds with potential applications in pharmacology. The project focuses on mining protein sequences from microalgal species to identify and characterize bioactive peptides, such as ACE-inhibitory peptides, which are relevant for cardiovascular health.
 
-This repository contains a script that automates queries on the [Biopep UWM database](https://biochemia.uwm.edu.pl/biopep/) for a given microalgal species, retrieves peptide activity reports, and saves them as Excel files organized by protein.
+This repository contains various scripts that automate different queries on the [BIOPEP-UWM database](https://biochemia.uwm.edu.pl/biopep/start_biopep.php) for a given microalgal species, retrieves reports, and saves them as files organized by protein.
 
 ---
 
