@@ -1,8 +1,8 @@
-# BioBloom
-
-<p align="center">
-  <img src="biobloom_logo" alt="BioBloom Logo" width="300">
+<p align="right">
+  <img src="BioBloom/biobloom_logo.png" alt="BioBloom Logo" width="120">
 </p>
+
+# BioBloom
 
 **BioBloom - Microalgae as a Source of Bioactive Compounds in Pharmacology**
 
