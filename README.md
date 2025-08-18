@@ -2,7 +2,7 @@
   <img src="biobloom_logo" alt="BioBloom Logo" width="120">
 </p>
 
-# BioBloom
+# BioBloom 🌿🫀
 
 **BioBloom - Microalgae as a Source of Bioactive Compounds in Pharmacology**
 
