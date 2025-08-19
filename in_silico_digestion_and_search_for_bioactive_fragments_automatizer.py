@@ -25,7 +25,7 @@ args = parser.parse_args()
 fasta_file = f"/home/marta/Desktop/biobloom_proteomic_data/{args.species}.fasta"
 base_dir = Path.home() / "Desktop" / "biopep_results"
 
-stage2_dir = base_dir / "stage2_in_sillico_digestion_results" / args.species
+stage2_dir = base_dir / "stage2_in_silico_digestion_results" / args.species
 stage3_dir = base_dir / "stage3_seach_for_active_fragments_results" / args.species
 
 # Download folder for Excel

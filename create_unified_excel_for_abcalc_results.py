@@ -1,25 +1,32 @@
 import os
 import pandas as pd
 import glob
+import argparse
+from pathlib import Path
 
-# Input root folder with species subfolders
-root_folder = '/home/marta/Desktop/biopep_results'
+# === ARGPARSE ===
+parser = argparse.ArgumentParser(description="Parse Biopep results for given species")
+parser.add_argument(
+    "species",
+    nargs="+",
+    help="Enter one or more species names to process"
+)
+args = parser.parse_args()
 
-# Output folder
-output_folder = '/home/marta/Desktop/biopep_results/abc_evaluation'
-os.makedirs(output_folder, exist_ok=True)
+# === CONFIGURATION ===
+root_folder = Path("/home/marta/Desktop/biopep_results")
+output_folder = root_folder / "abc_evaluation"
+output_folder.mkdir(parents=True, exist_ok=True)
 
-# Species to analyze
-species_list = ["arthrospira_platensis", "microchloropsis_salina", "tetraselmis_suecica"]
-
-for species in species_list:
+# === LOOP THROUGH SPECIES ===
+for species in args.species:
+    species_path = root_folder / species
     data = []
-    species_path = os.path.join(root_folder, species)
 
-    if os.path.isdir(species_path):
+    if species_path.is_dir():
         for protein_folder in os.listdir(species_path):
-            protein_path = os.path.join(species_path, protein_folder)
-            if os.path.isdir(protein_path):
+            protein_path = species_path / protein_folder
+            if protein_path.is_dir():
                 # Extract protein ID from folder name (between first and second '|')
                 if '|' in protein_folder:
                     protein_id = protein_folder.split('|')[1]
@@ -27,7 +34,7 @@ for species in species_list:
                     protein_id = protein_folder
 
                 # Find all Excel files in the folder
-                excel_files = glob.glob(os.path.join(protein_path, '*.xlsx'))
+                excel_files = glob.glob(str(protein_path / '*.xlsx'))
                 for excel_file in excel_files:
                     try:
                         df = pd.read_excel(excel_file, header=None)
@@ -36,14 +43,15 @@ for species in species_list:
                         B = df.iloc[2, 4]         # E3
                         data.append([protein_id, sequence, A, B])
                     except Exception as e:
-                        print(f"Error reading {excel_file}: {e}")
+                        print(f"[!] Error reading file {excel_file}: {e}")
 
-        # Create dataframe for species
-        df_species = pd.DataFrame(data, columns=['Protein_ID', 'Sequence', 'A', 'B'])
-
-        # Save to one Excel file per species
-        excel_path = os.path.join(output_folder, f"abcalculations_results_{species}.xlsx")
-        df_species.to_excel(excel_path, index=False)
-        print(f"[OK] Dane dla {species} zapisane w pliku: {excel_path}")
+        # Create DataFrame for species
+        if data:
+            df_species = pd.DataFrame(data, columns=['Protein_ID', 'Sequence', 'A', 'B'])
+            excel_path = output_folder / f"abcalculations_results_{species}.xlsx"
+            df_species.to_excel(excel_path, index=False)
+            print(f"[OK] Data for {species} saved to file: {excel_path}")
+        else:
+            print(f"[!] No data to save for species: {species}")
     else:
-        print(f"[!] Brak folderu dla gatunku: {species}")
+        print(f"[!] No folder found for species: {species}")
