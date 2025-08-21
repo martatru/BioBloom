@@ -272,8 +272,14 @@ class BIOPEPAnalyzer:
             print("🚪 Zamknięto przeglądarkę")
 
 
+import sys
+
 def main():
-    analyzer = BIOPEPAnalyzer(headless=False)
+    # ✅ Zapytaj użytkownika czy chce tryb headless
+    headless_input = input("Czy uruchomić w trybie headless? (t/n): ").strip().lower()
+    headless_mode = headless_input == 't'
+
+    analyzer = BIOPEPAnalyzer(headless=headless_mode)
     analyzer.setup_driver()
     try:
         file_path = analyzer.get_file_path()
@@ -295,3 +301,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 BIOPEP UWM Selenium Automation Script
-Automatyzuje proces analizy peptydów z aktywnością ACE inhibitor na stronie BIOPEP UWM
+Automatyzuje proces analizy peptydów na stronie BIOPEP UWM
 """
 
 from selenium import webdriver
@@ -13,6 +13,7 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException,
 from selenium.webdriver.chrome.service import Service
 from webdriver_manager.chrome import ChromeDriverManager
 import os
+import time
 from datetime import datetime
 
 DEFAULT_TIMEOUT = 1000  # w sekundach
@@ -186,66 +187,24 @@ class BIOPEPAnalyzer:
                 return
             print(f"✓ Znaleziono {len(tables)} tabel do analizy")
 
-            filtered_tables = []
-            for table in tables:
-                rows = table.find_elements(By.CSS_SELECTOR, "tr")
-                if not rows:
-                    continue
+            # Filtrowanie tylko tych tabel, które zawierają słowo "Sequence"
+            filtered_tables = [table for table in tables if "Sequence" in table.text]
+            print(f"✓ Do dalszej analizy wybrano {len(filtered_tables)} tabel z 'Sequence'")
 
-                # znajdź nagłówek
-                header_row = None
-                header_idx = 0
-                for idx, tr in enumerate(rows):
-                    if tr.find_elements(By.TAG_NAME, "th"):
-                        header_row = tr
-                        header_idx = idx
-                        break
-                if header_row is None:
-                    header_row = rows[0]
-                    header_idx = 0
-
-                header_cells = header_row.find_elements(By.TAG_NAME, "th")
-                if not header_cells:
-                    header_cells = header_row.find_elements(By.TAG_NAME, "td")
-
-                headers = [" ".join(c.text.split()).strip().lower() for c in header_cells]
-                if any("sequence" in h for h in headers):
-                    filtered_tables.append((table, rows, headers, header_idx))
-
-            print(f"✓ Do dalszej analizy wybrano {len(filtered_tables)} tabel z kolumną 'Sequence'")
-
-            for table, rows, headers, header_idx in filtered_tables:
-                seq_idx = None
-                act_idx = None
-                for i, h in enumerate(headers):
-                    if seq_idx is None and "sequence" in h:
-                        seq_idx = i
-                    if act_idx is None and "activity" in h:
-                        act_idx = i
-
-                if seq_idx is None or act_idx is None:
-                    print("⚠️ Pomijam tabelę: brak wymaganych kolumn 'Sequence' i/lub 'Activity'")
-                    continue
-
-                data_rows = rows[header_idx + 1:]
-                for row in data_rows:
+            for table in filtered_tables:
+                rows = table.find_elements(By.TAG_NAME, "tr")[1:]  # pomijamy nagłówek
+                for row in rows:
                     cells = row.find_elements(By.TAG_NAME, "td")
-                    if not cells or len(cells) <= max(seq_idx, act_idx):
-                        continue
-
-                    activity = cells[act_idx].text.strip()
-                    if "ace inhibitor" in activity.lower():
-                        sequence = cells[seq_idx].text.strip()
-                        if sequence and sequence not in self.results:
+                    if len(cells) >= 5:
+                        sequence = cells[1].text.strip()
+                        activity = cells[2].text.strip()
+                        if "ACE inhibitor" in activity and sequence and sequence not in self.results:
                             self.results.append(sequence)
                             print(f"✓ Znaleziono sekwencję: {sequence}")
-
-            if not self.results:
-                print("⚠️ Nie znaleziono sekwencji z aktywnością 'ACE inhibitor'")
-
         except Exception as e:
             print(f"❌ Błąd podczas wyodrębniania sekwencji: {e}")
             raise
+
 
     def save_results(self):
         try:
