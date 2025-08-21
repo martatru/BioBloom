@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+"""
+Merging separated a. platensis peptide files and deleting peptide duplicates script
+
+"""
 
 import os
 
@@ -14,24 +17,24 @@ def main():
 
     # Output directory
     output_dir = "/home/marta/Desktop/biobloom_proteomic_data/aplatensis_unified_peptide_lists"
-    os.makedirs(output_dir, exist_ok=True)  # tworzy katalog jeśli nie istnieje
+    os.makedirs(output_dir, exist_ok=True)  # create directory if it doesn't exist
 
     # Output file
     output_path = os.path.join(output_dir, "unified_peptides.txt")
 
-    # Wczytaj wszystkie peptydy i usuń duplikaty
+    # Load all peptides and remove duplicates
     peptides = set()
     for file_path in input_files:
         with open(file_path, "r") as f:
             for line in f:
                 peptide = line.strip()
-                if peptide:  # pomiń puste linie
+                if peptide:  # skip empty lines
                     peptides.add(peptide)
 
-    # Sortowanie dla czytelności
+    # Sort for readability
     peptides = sorted(peptides)
 
-    # Zapisz do pliku
+    # Write to file
     with open(output_path, "w") as out:
         out.write("\n".join(peptides))
 
