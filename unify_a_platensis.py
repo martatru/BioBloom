@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 
-def main():
-    import os
+import os
 
+def main():
     # Ask for 4 input files
     input_files = []
     for i in range(4):
@@ -12,27 +12,31 @@ def main():
             return
         input_files.append(path)
 
-    # Output file
-    output_path = "/home/marta/Desktop/biobloom_proteomic_data/aplatensis_unified_peptide_lists"
+    # Output directory
+    output_dir = "/home/marta/Desktop/biobloom_proteomic_data/aplatensis_unified_peptide_lists"
+    os.makedirs(output_dir, exist_ok=True)  # tworzy katalog jeśli nie istnieje
 
+    # Output file
+    output_path = os.path.join(output_dir, "unified_peptides.txt")
+
+    # Wczytaj wszystkie peptydy i usuń duplikaty
     peptides = set()
     for file_path in input_files:
         with open(file_path, "r") as f:
             for line in f:
                 peptide = line.strip()
-                if peptide:  # skip empty lines
+                if peptide:  # pomiń puste linie
                     peptides.add(peptide)
 
-    # Sort for reproducibility
+    # Sortowanie dla czytelności
     peptides = sorted(peptides)
 
-    # Write unified list
+    # Zapisz do pliku
     with open(output_path, "w") as out:
         out.write("\n".join(peptides))
 
     print(f"Unified list written to {output_path}")
     print(f"Total unique peptides: {len(peptides)}")
-
 
 if __name__ == "__main__":
     main()
