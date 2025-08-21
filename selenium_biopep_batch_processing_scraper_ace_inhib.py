@@ -1,6 +1,6 @@
 """
 BIOPEP UWM Selenium Automation Script
-Automates peptide analysis on the BIOPEP UWM website
+Automates batch processing ACE inhibitory activity analysis on the BIOPEP UWM website
 """
 
 from selenium import webdriver

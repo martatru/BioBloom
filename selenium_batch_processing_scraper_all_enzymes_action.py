@@ -1,6 +1,6 @@
 """
 BIOPEP UWM Selenium Automation Script
-Automates peptide analysis on the BIOPEP UWM website
+Automates batch processing enzyme's action analysis on the BIOPEP UWM website
 """
 
 from selenium import webdriver
@@ -176,22 +176,29 @@ class BIOPEPAnalyzer:
                 print("No result tables found")
                 return
 
-            filtered_tables = []
+            seen_peptides = set()
+            selected_tables = []
+
+            # Szukamy tabel, które zawierają td.infobold z tekstem 'Results of enzyme action'
             for table in tables:
-                header_cells = table.find_elements(By.TAG_NAME, "th")
-                headers = [c.text.strip().lower() for c in header_cells]
-                if any("results of enzyme action" in h for h in headers):
-                    filtered_tables.append(table)
+                try:
+                    header_td = table.find_element(By.CSS_SELECTOR, "td.infobold font[size='-1']")
+                    if "results of enzyme action" in header_td.text.strip().lower():
+                        selected_tables.append(table)
+                except NoSuchElementException:
+                    continue
 
-            print(f"{len(filtered_tables)} tables selected with 'Results of enzyme action' header")
+            print(f"{len(selected_tables)} tables selected with 'Results of enzyme action' header")
 
-            for table in filtered_tables:
+            # Zbieramy wszystkie peptydy z td.info font[size='-1']
+            for table in selected_tables:
                 td_elements = table.find_elements(By.CSS_SELECTOR, "td.info font[size='-1']")
                 for td in td_elements:
                     text = td.text.strip()
                     peptides = [p.strip() for p in text.split('-') if len(p.strip()) > 1]
                     for peptide in peptides:
-                        if peptide not in self.results:
+                        if peptide not in seen_peptides:
+                            seen_peptides.add(peptide)
                             self.results.append(peptide)
                             print(f"Found peptide: {peptide}")
 
@@ -207,10 +214,9 @@ class BIOPEPAnalyzer:
             if not self.results:
                 print("No results to save")
                 return
-            # Save output in the requested folder
             output_folder = os.path.join(
-                self.base_folder, 
-                "peptide_lists", 
+                self.base_folder,
+                "peptide_lists",
                 "biopep_enzymes_action_results"
             )
             os.makedirs(output_folder, exist_ok=True)
