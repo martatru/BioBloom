@@ -25,12 +25,12 @@ output_file = os.path.join(output_folder, f"{species_name}_formatted.txt")
 with open(input_file, "r") as f:
     lines = f.readlines()
 
-# Format sequences with '>' on a separate line
+# Format sequences with '> peptideX' on a separate line
 formatted_lines = []
-for line in lines:
+for idx, line in enumerate(lines, start=1):
     seq = line.strip()
     if seq:  # skip empty lines
-        formatted_lines.append(">\n")
+        formatted_lines.append(f"> peptide{idx}\n")
         formatted_lines.append(seq + "\n")
 
 # Write to the output file
