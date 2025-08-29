@@ -1,4 +1,7 @@
-#!/usr/bin/env python3
+"""
+this script converts fasta-->smiles or smiles -->fasta and saves the output into a parsed folder
+
+"""
 import os, sys, csv, subprocess
 from typing import Optional, Tuple
 

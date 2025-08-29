@@ -1,9 +1,9 @@
 """
+this script selects peptides with top ADMET properties from csv output files from batch processing module on AdmetLab 3.0. and saves selected peptides into separate files
+
 how to run:
 
-python select_top_peptides_for_molecular_docking.py --input /home/marta/Desktop/admet_output/t_suecica/t_suecica.csv
-python select_top_peptides_for_molecular_docking.py --input /home/marta/Desktop/admet_output/m_salina/m_salina_merged.csv
-python select_top_peptides_for_molecular_docking.py --input /home/marta/Desktop/admet_output/a_platensis/a_platensis_merged.csv
+python select_top_peptides_for_molecular_docking.py --input /path/to/csv/file
 
 """
 
@@ -13,10 +13,10 @@ import numpy as np
 
 DEFAULT_OUTROOT = "/home/marta/Desktop/peptides_chosen_for_docking/smiles_lists"
 
-ALL_OUT   = "peptides_ranked_all.csv"
-PASS_OUT  = "peptides_ranked_pass.csv"
-TOP50_OUT = "top50_peptides.csv"
-STATS_OUT = "criterion_pass_rates.txt"
+ALL_OUT          = "peptides_ranked_all.csv"
+PASS_OUT         = "peptides_ranked_pass.csv"
+PASS_PLUS5_OUT   = "peptides_pass_plus_5of6_ranked.csv"  # <— NOWY główny wynik
+STATS_OUT        = "criterion_pass_rates.txt"
 
 # ---------- IO helpers ----------
 def detect_sep(path):
@@ -70,11 +70,10 @@ def is_negative_flag(x, thr=0.5):
     s = str(x).strip().lower()
     if s in ("neg","negative","no","false","0","low","non-blocker","nonblocker"): return True
     if s in ("pos","positive","yes","true","1","blocker","high"): return False
-    # numeric in string
     try:
         v = float(s.replace(",","."))
         return v < thr
-    except:  # unknown token
+    except:
         return False
 
 def is_positive_flag(x, thr=0.5):
@@ -148,7 +147,6 @@ def build_with_derivatives(df, ba_prob_cut=50.0):
     # Bezpieczeństwo (panel WoE)
     out["Ames_neg_"] = df["Ames"].apply(is_negative_flag) if "Ames" in df.columns else False
     out["DILI_neg_"] = df["DILI"].apply(is_negative_flag) if "DILI" in df.columns else False
-    # prefer hERG-10um jeśli jest; inaczej hERG
     if "hERG-10um" in df.columns:
         out["hERG_neg_"] = df["hERG-10um"].apply(is_negative_flag)
     elif "hERG" in df.columns:
@@ -172,13 +170,8 @@ def build_with_derivatives(df, ba_prob_cut=50.0):
     out["C3_BA_gt30_prob"]  = out["Fxx_pct_"] >= ba_prob_cut
     out["C4_Vd_range"]      = (out["Vd_Lkg_"] >= 0.04) & (out["Vd_Lkg_"] <= 20.0)
     out["C5_t12_ge_0p5h"]   = out["t_half_h_"] >= 0.5
-
-    # (6) Bezpieczeństwo: Ames−, DILI−, hERG− oraz brak interferencji
+    # (6) Bezpieczeństwo: Ames−, DILI−, hERG− oraz brak interferencji + LD50 logika
     out["C6_safety_panel"]  = out["Ames_neg_"] & out["DILI_neg_"] & out["hERG_neg_"] & (~out["Interference_any_"])
-
-    # LD50 logika WoE:
-    # Jeśli LD50 jest dostępne → wymagamy LD50>500 ORAZ C6_safety_panel
-    # Jeśli LD50 brak           → wymagamy C6_safety_panel (bez warunku LD50)
     out["C6_final"] = np.where(out["LD50_available_"],
                                (out["LD50_mgkg_"] > 500.0) & out["C6_safety_panel"],
                                out["C6_safety_panel"])
@@ -188,7 +181,6 @@ def build_with_derivatives(df, ba_prob_cut=50.0):
     out["Pass_WZ"]    = out["Pass_Count"] == 6
 
     # --------- Ranking (kompozyt) ---------
-    # Bez LD50 w składowej (stosujemy panel bezpieczeństwa)
     safety_avg = (out["Ames_neg_"].astype(float) + out["DILI_neg_"].astype(float) + out["hERG_neg_"].astype(float)) / 3.0
     interf_pen = out["Interference_any_"].astype(float)  # 1 jeśli problem
 
@@ -206,13 +198,12 @@ def build_with_derivatives(df, ba_prob_cut=50.0):
     out["interf_pen_"] = interf_pen
     out["ADMET_score_"] = out.apply(score_row, axis=1)
 
-    # Tie helper
     out["Hsum_"] = (out["nHD_"].fillna(99) + out["nHA_"].fillna(99))
     return out
 
 # ---------- main ----------
 def main():
-    ap = argparse.ArgumentParser(description="Rank ALL peptides per new methodology (ADMETlab 3.0).")
+    ap = argparse.ArgumentParser(description="Rank peptides per new methodology (ADMETlab 3.0).")
     ap.add_argument("--input", required=True, help="Path to species CSV (single header line).")
     ap.add_argument("--ba_prob_cut", type=float, default=50.0,
                     help="Probability cutoff (%) that oral BA > 30% (default 50).")
@@ -223,7 +214,7 @@ def main():
     df = read_csv_robust(args.input)
     ranked = build_with_derivatives(df, ba_prob_cut=args.ba_prob_cut)
 
-    # Sort: passers first, then by score, then tie-breakers
+    # Sort globalnie: passers first, potem score, potem tie-breakery
     ranked = ranked.sort_values(
         by=["Pass_WZ","ADMET_score_","Lipinski_passes_","MW_","Hsum_"],
         ascending=[False, False, True, True, True]
@@ -233,31 +224,35 @@ def main():
     outdir = os.path.join(args.outroot, base)
     os.makedirs(outdir, exist_ok=True)
 
-    all_path  = os.path.join(outdir, ALL_OUT)
-    pass_path = os.path.join(outdir, PASS_OUT)
-    top_path  = os.path.join(outdir, TOP50_OUT)
-    stats_path= os.path.join(outdir, STATS_OUT)
+    all_path        = os.path.join(outdir, ALL_OUT)
+    pass_path       = os.path.join(outdir, PASS_OUT)
+    pass_plus5_path = os.path.join(outdir, PASS_PLUS5_OUT)
+    stats_path      = os.path.join(outdir, STATS_OUT)
 
+    # Zapis pełnego rankingu i PASS 6/6 (jak dotąd)
     ranked.to_csv(all_path, index=False)
     strict_pass = ranked[ranked["Pass_WZ"]]
     strict_pass.to_csv(pass_path, index=False)
 
-    # Always produce a Top-50:
-    if len(strict_pass) > 0:
-        top = strict_pass.head(min(50, len(strict_pass))); source = "strict (6/6)"
-    else:
-        relaxed = ranked[ranked["Pass_Count"] >= 5]
-        if len(relaxed) > 0:
-            top = relaxed.head(min(50, len(relaxed))); source = "relaxed (>=5/6)"
-        else:
-            top = ranked.head(min(50, len(ranked)));   source = "overall"
-    top.to_csv(top_path, index=False)
+    # NOWE: zbiór 6/6 + (>=5/6 ale !=6/6), posortowany jak wyżej
+    relaxed = ranked[(ranked["Pass_Count"] >= 5) & (~ranked["Pass_WZ"])]
+    out_sel = pd.concat([strict_pass.assign(Criteria_Tier="6/6"),
+                         relaxed.assign(Criteria_Tier=">=5/6")], axis=0)
 
-    # Stats & audit
+    # Dodatkowe uporządkowanie: 6/6 najpierw, potem ADMET_score_
+    out_sel = out_sel.sort_values(
+        by=["Pass_WZ","ADMET_score_","Lipinski_passes_","MW_","Hsum_"],
+        ascending=[False, False, True, True, True]
+    )
+
+    out_sel.to_csv(pass_plus5_path, index=False)
+
+    # Statystyki / audit
     n = len(ranked)
     with open(stats_path, "w") as f:
         f.write(f"Total rows: {n}\n")
         f.write(f"Strict pass (all 6): {int(ranked['Pass_WZ'].sum())}\n")
+        f.write(f"Relaxed (>=5/6): {int((ranked['Pass_Count'] >= 5).sum())}\n")
         f.write(f"C1 Lipinski ≥3/4: {int((ranked['Lipinski_passes_'] >= 3).sum())}\n")
         f.write(f"C2 HIA>30%: {int((ranked['HIA_pct_'] > 30).sum())}\n")
         f.write(f"C3 BA>30% prob ≥{args.ba_prob_cut}%: {int((ranked['Fxx_pct_'] >= args.ba_prob_cut).sum())}\n")
@@ -274,8 +269,8 @@ def main():
 
     print(f"[OK] Out folder: {outdir}")
     print(f"[OK] Ranked ALL → {all_path}")
-    print(f"[OK] Strict PASS → {pass_path}  (rows: {len(strict_pass)})")
-    print(f"[OK] Top-50 ({source}) → {top_path}")
+    print(f"[OK] Strict PASS (6/6) → {pass_path}  (rows: {len(strict_pass)})")
+    print(f"[OK] PASS + >=5/6 ranked → {pass_plus5_path}  (rows: {len(out_sel)})")
     print(f"[OK] Stats → {stats_path}")
 
 if __name__ == "__main__":
