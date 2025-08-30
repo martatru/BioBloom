@@ -32,3 +32,22 @@ This repository provides a collection of scripts for:
 
 ## Workflow
 
+Proteome FASTA
+↓
+BIOPEP-UWM automation → Peptide lists
+↓
+Unify/Deduplicate → (optional) pLM4ACE prep / SMILES↔FASTA
+↓
+ADMET screening (AdmetLab) → Select top peptides
+↓
+Peptide 3D (PyRosetta) + Receptor repack
+↓
+Docking preparation/output
+
+## Documentation
+
+See [https://github.com/martatru/BioBloom/wiki](Wiki) for **full documentation**:
+- detailed script descriptions,
+- requirements,
+- usage examples,
+- full pipeline workflow.
