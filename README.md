@@ -6,28 +6,63 @@
 
 **Microalgae as a Source of Bioactive Compounds in Pharmacology**
 
-**Marta Truszczyńska & Paulina Duszyńska**
+---
+
+## Overview
+
+BioBloom is a research project exploring **microalgae proteomes** as a source of bioactive peptides with pharmacological potential (especially ACE inhibitors for cardiovascular health).  
+
+This repository provides a collection of scripts for:
+- querying **BIOPEP-UWM**,
+- peptide filtering & ADMET screening,
+- **SMILES/FASTA/PDB** conversions,
+- peptide/receptor structure generation for docking.
 
 ---
 
-## Project Overview
+## Repository Structure
 
-BioBloom is a research project aimed at exploring microalgae as a rich source of bioactive compounds with potential applications in pharmacology. The project focuses on mining protein sequences from microalgal species to identify and characterize bioactive peptides, such as ACE-inhibitory peptides, which are relevant for cardiovascular health.
-
-This repository contains various scripts that automate different queries on the [BIOPEP-UWM database](https://biochemia.uwm.edu.pl/biopep/start_biopep.php) for a given microalgal species, retrieves reports, and saves them as files organized by protein.
+- `biopep_uwm/` → BIOPEP-UWM automation  
+- `admet/` → unify and filter ADMET outputs  
+- `molecular_docking/` → peptide & receptor structure prep  
+- `pLM4ACE/` → input/output formatting for pLM4ACE model  
+- `smiles_conversion/` → utilities for FASTA/SMILES conversion  
 
 ---
 
-## Requirements
+## Workflow
 
-- Python 3.x
-- Packages:
-  - `biopython`
-  - `selenium`
-  - `tqdm`
-  - `openpyxl`
+<p align="right">
+  <img src="biobloom_logo" alt="BioBloom Logo" width="120">
+</p>
 
-Install the dependencies via pip:
+# BioBloom 🌿🫀
 
-```bash
-pip install biopython selenium tqdm openpyxl
+**Microalgae as a Source of Bioactive Compounds in Pharmacology**
+
+---
+
+## Overview
+
+BioBloom is a research project exploring **microalgae proteomes** as a source of bioactive peptides with pharmacological potential (especially ACE inhibitors for cardiovascular health).  
+
+This repository provides a collection of scripts for:
+- querying **BIOPEP-UWM**,
+- peptide filtering & ADMET screening,
+- **SMILES/FASTA/PDB** conversions,
+- peptide/receptor structure generation for docking.
+
+---
+
+## Repository Structure
+
+- `biopep_uwm/` → BIOPEP-UWM automation  
+- `admet/` → unify and filter ADMET outputs  
+- `molecular_docking/` → peptide & receptor structure prep  
+- `pLM4ACE/` → input/output formatting for pLM4ACE model  
+- `smiles_conversion/` → utilities for FASTA/SMILES conversion  
+
+---
+
+## Workflow
+
