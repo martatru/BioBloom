@@ -3,18 +3,17 @@ import sys
 
 
 '''
-mkdir -p /home/marta/Desktop/docking_files/ace_peptide_complexes
 
-run batch for 15 peptides: 
-REF=/home/marta/Desktop/docking_files/ACE_structures/1O86.pdb
-REC=/home/marta/Desktop/docking_files/ACE_structures/ACE_repacked.pdb
-PEPDIR=/home/marta/Desktop/docking_files/peptides_chosen_for_docking/pdb_peptides_selected_for_docking
-OUTDIR=/home/marta/Desktop/docking_files/ace_peptide_complexes
+mkdir -p /home/marta/Pulpit/pliki_do_dokowania_niezjebane/
+
+REF=/home/marta/Pulpit/ACE_niezjebane/ACE/1O86.pdb
+REC=/home/marta/Pulpit/ACE_niezjebane/ACE/ACE_repacked.pdb
+PEPDIR=/home/marta/Pulpit/ACE_niezjebane/PEPTYDY/
+OUTDIR=/home/marta/Pulpit/pliki_do_dokowania_niezjebane/
 
 for pep in "$PEPDIR"/*.pdb; do
   base=$(basename "$pep" .pdb)
-  /home/marta/Downloads/pymol/bin/pymol -cq place_pep_into_ace.py -- "$REF" "$REC" "$pep" "$OUTDIR/ACE_${base}.pdb"
-done
+  /usr/bin/pymol -cq place_pep_into_ace.py -- "$REF" "$REC" "$pep" "$OUTDIR/ACE_${base}.pdb"
 
 
 '''
